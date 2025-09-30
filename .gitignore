@@ -1,0 +1,7 @@
+# Ignore my_folder
+venv/
+*.log
+*.txt
+*.xlsx
+*.csv
+*.md

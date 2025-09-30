@@ -1,0 +1,23 @@
+Value PROTOCOL (\w+)
+Value SRC_INTERFACE (\S+)
+Value SRC_IP (\d+\.\d+\.\d+\.\d+)
+Value SRC_PORT (\d+)
+Value DST_INTERFACE (\S+)
+Value DST_IP (\d+\.\d+\.\d+\.\d+)
+Value DST_PORT (\d+)
+Value FLAGS (\S+)
+Value IDLE_TIME (\S+)
+Value UPTIME (\S+)
+Value TIMEOUT (\S+)
+Value BYTES (\d+)
+Value RX_RING_NUM (\d+)
+Value INTERNAL_DATA (\S+)
+Value INITIATOR_IP (\d+\.\d+\.\d+\.\d+)
+Value RESPONDER_IP (\d+\.\d+\.\d+\.\d+)
+Value KEYID (\d+)
+
+Start
+  ^${PROTOCOL}\s+${SRC_INTERFACE}:\s+${SRC_IP}/${SRC_PORT}\s+${DST_INTERFACE}:\s+${DST_IP}/${DST_PORT}, -> Continue.Record
+  ^\s+flags\s+${FLAGS},\s+idle\s+${IDLE_TIME},\s+uptime\s+${UPTIME},\s+timeout\s+${TIMEOUT},\s+bytes\s+${BYTES},\s+Rx-RingNum\s+${RX_RING_NUM},\s+${INTERNAL_DATA}
+  ^\s+Initiator:\s+${INITIATOR_IP},\s+Responder:\s+${RESPONDER_IP}
+  ^\s+Connection\s+lookup\s+keyid:\s+${KEYID}
