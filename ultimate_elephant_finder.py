@@ -92,17 +92,21 @@ def main():
         min_uptime_hours = 0
         min_bytes = 0
         min_mbps = 0
+        # Override to ensure we only get flagged flows
+        special_mode = 'flags_only'
     elif args.offloaded_only:
         include_flagged = False
         include_offloaded = True
         min_uptime_hours = 0
         min_bytes = 0
         min_mbps = 0
+        special_mode = 'offloaded_only'
     else:
         include_flagged = args.include_flags
         include_offloaded = args.include_offloaded
         min_uptime_hours = args.min_hours
         min_mbps = args.min_rate
+        special_mode = None
     
     # Find elephant flows
     elephant_flows = conn_parser.find_elephant_flows(
@@ -113,6 +117,14 @@ def main():
         include_flagged=include_flagged,
         include_offloaded=include_offloaded
     )
+    
+    # Apply special filtering if needed
+    if special_mode == 'flags_only':
+        # Only keep flows that actually have elephant flags
+        elephant_flows = [f for f in elephant_flows if f.get('is_flagged_elephant', False)]
+    elif special_mode == 'offloaded_only':
+        # Only keep flows that are actually offloaded
+        elephant_flows = [f for f in elephant_flows if f.get('is_offloaded_elephant', False)]
     
     if not elephant_flows:
         print("No elephant flows found with the specified criteria")
