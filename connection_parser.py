@@ -431,7 +431,7 @@ class ConnectionParser:
         
         return elephant_flows
     
-    def print_elephant_flows(self, elephant_flows, limit=20, show_flags=True):
+    def print_elephant_flows(self, elephant_flows, limit=20):
         """Print elephant flows in a formatted table with enhanced information"""
         if not elephant_flows:
             print("No elephant flows found")
@@ -441,13 +441,9 @@ class ConnectionParser:
         print(f"ENHANCED ELEPHANT FLOWS ANALYSIS - Top {min(limit, len(elephant_flows))} flows")
         print(f"{'='*130}")
         
-        # Header
-        if show_flags:
-            print(f"{'#':<3} {'Proto':<5} {'Source':<20} {'Destination':<20} {'Uptime':<12} {'Bytes':<12} {'Rate':<10} {'Flags':<15} {'Type':<25}")
-            print(f"{'-'*130}")
-        else:
-            print(f"{'#':<3} {'Protocol':<8} {'Source':<25} {'Destination':<25} {'Uptime':<15} {'Bytes':<15} {'Rate':<12} {'Type':<20}")
-            print(f"{'-'*120}")
+        # Header - Always show flags, remove redundant type column
+        print(f"{'#':<3} {'Protocol':<8} {'Source':<25} {'Destination':<25} {'Uptime':<15} {'Bytes':<15} {'Rate':<12} {'Flags':<20}")
+        print(f"{'-'*125}")
         
         for i, flow in enumerate(elephant_flows[:limit]):
             # Format uptime
@@ -487,25 +483,27 @@ class ConnectionParser:
             src = f"{flow.get('src_ip', 'N/A')}:{flow.get('src_port', 'N/A')}"
             dst = f"{flow.get('dst_ip', 'N/A')}:{flow.get('dst_port', 'N/A')}"
             
-            # Format flags
+            # Format flags - Enhanced display showing all flags
             flags_str = "N/A"
-            if 'raw_flags' in flow:
-                flags_str = flow['raw_flags'][:14]  # Truncate long flags
+            if 'raw_flags' in flow and flow['raw_flags']:
+                raw_flags = flow['raw_flags']
                 
-                # Highlight special flags
+                # Highlight special flags within the complete flag set
                 if flow.get('has_elephant_flag'):
                     elephant_type = flow.get('elephant_flag_type', '')
-                    flags_str = f"*{elephant_type}*" + flags_str.replace(elephant_type, '')
-                elif flow.get('is_offloaded'):
-                    flags_str = f"*o*{flags_str.replace('o', '')}"
+                    # Highlight the elephant flag but keep all other flags
+                    flags_str = raw_flags.replace(elephant_type, f"*{elephant_type}*")[:18]
+                elif flow.get('is_offloaded') and 'o' in raw_flags:
+                    # Highlight the offloaded flag but keep all other flags  
+                    flags_str = raw_flags.replace('o', '*o*')[:18]
+                else:
+                    # Show actual flags for better visibility
+                    flags_str = raw_flags[:18]
+            elif 'flags' in flow and flow['flags']:
+                flags_str = flow['flags'][:18]
             
-            # Get flow type
-            flow_type = flow.get('elephant_flow_type', 'Unknown')[:24]
-            
-            if show_flags:
-                print(f"{i+1:<3} {flow.get('protocol', 'N/A'):<5} {src:<20} {dst:<20} {uptime_str:<12} {bytes_str:<12} {rate_str:<10} {flags_str:<15} {flow_type:<25}")
-            else:
-                print(f"{i+1:<3} {flow.get('protocol', 'N/A'):<8} {src:<25} {dst:<25} {uptime_str:<15} {bytes_str:<15} {rate_str:<12} {flow_type:<20}")
+            # Always show flags, no more redundant type column
+            print(f"{i+1:<3} {flow.get('protocol', 'N/A'):<8} {src:<25} {dst:<25} {uptime_str:<15} {bytes_str:<15} {rate_str:<12} {flags_str:<20}")
     
     def print_elephant_flow_details(self, elephant_flows, limit=5):
         """Print detailed information about top elephant flows"""
