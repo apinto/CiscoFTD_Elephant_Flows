@@ -376,9 +376,35 @@ class ConnectionParser:
             is_flagged_elephant = flag_info.get('has_elephant_flag', False) and include_flagged
             is_offloaded_elephant = flag_info.get('is_offloaded', False) and include_offloaded
             
-            # Check if it qualifies as elephant flow
-            qualifies = (is_long_lived or is_high_volume or is_high_rate or 
-                        is_flagged_elephant or is_offloaded_elephant)
+            # Check if it qualifies as elephant flow based on the specified criteria
+            
+            # Basic threshold criteria (must meet ALL specified non-zero thresholds)
+            basic_criteria_met = True
+            
+            if min_uptime_hours > 0:
+                basic_criteria_met = basic_criteria_met and is_long_lived
+            if min_bytes > 0:
+                basic_criteria_met = basic_criteria_met and is_high_volume
+            if min_mbps > 0:
+                basic_criteria_met = basic_criteria_met and is_high_rate
+                
+            # Flag-based criteria (additional qualifications)
+            flag_criteria_met = False
+            if include_flagged and is_flagged_elephant:
+                flag_criteria_met = True
+            if include_offloaded and is_offloaded_elephant:
+                flag_criteria_met = True
+            
+            # Qualify if: 
+            # 1. All specified basic criteria are met (and at least one threshold was specified), OR
+            # 2. Flag-based criteria are met (when explicitly included)
+            has_basic_thresholds = min_uptime_hours > 0 or min_bytes > 0 or min_mbps > 0
+            
+            if has_basic_thresholds:
+                qualifies = basic_criteria_met or flag_criteria_met
+            else:
+                # If no basic thresholds specified, only flag-based criteria apply
+                qualifies = flag_criteria_met
             
             if qualifies:
                 # Create enhanced connection record
