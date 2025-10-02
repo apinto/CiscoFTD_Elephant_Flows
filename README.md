@@ -306,8 +306,9 @@ The tool recognizes and analyzes Cisco ASA connection flags:
 
 ### **Traffic Rate Calculation**
 ```python
-# Rate calculation formula
-rate_mbps = (total_bytes * 8) / (uptime_seconds * 1_000_000)
+# Rate calculation formula (actual implementation)
+bytes_per_second = bytes_count / uptime_seconds
+mbps = (bytes_per_second * 8) / (1024 * 1024)  # Binary Mbps conversion
 
 # Rate categories
 very_low:      < 0.1 Mbps
@@ -596,7 +597,7 @@ This system is designed for:
 ### 🏗️ System Requirements
 
 - **Python 3.6+**
-- **Required Libraries**: `textfsm`, `csv`, `json`, `collections`, `datetime`, `re`
+- **Required Libraries**: `textfsm`, `csv`, `json`, `collections`, `datetime`, `re`, `os`
 - **Input**: Cisco ASA `show conn detail` output file
 - **Memory**: Sufficient for processing large connection tables (tested with 391K+ connections)
 - **Storage**: Space for CSV exports and analysis results
@@ -622,3 +623,39 @@ This system is designed for:
    ```
 
 This unified elephant flow detection system provides network operations teams with comprehensive analysis capabilities for Cisco ASA connection data, combining traditional detection methods with ASA-native intelligence for unprecedented accuracy and operational value.
+
+---
+
+## ⚠️ **DISCLAIMER**
+
+**USE AT YOUR OWN RISK**
+
+This software is provided "AS IS" without warranty of any kind. The authors and contributors make no representations or warranties regarding the accuracy, reliability, or suitability of this tool for any purpose. 
+
+**Important Considerations:**
+
+- **Network Impact**: This tool analyzes network connection data but does not directly modify network configurations. However, decisions made based on its output could impact network operations.
+
+- **Data Sensitivity**: Connection data may contain sensitive network information. Ensure proper handling and storage of exported data according to your organization's security policies.
+
+- **Analysis Accuracy**: While this tool has been extensively tested, network analysis results should always be validated against multiple sources and interpreted by qualified network professionals.
+
+- **Production Use**: Test thoroughly in non-production environments before using in production networks. Understand the tool's behavior with your specific data formats and network configurations.
+
+- **Compliance**: Ensure usage complies with your organization's policies, regulatory requirements, and applicable laws regarding network monitoring and data analysis.
+
+**The user assumes full responsibility for:**
+- Proper tool configuration and usage
+- Validation of analysis results
+- Network changes made based on tool output
+- Data security and compliance requirements
+- Any direct or indirect consequences of using this tool
+
+**Recommended Best Practices:**
+- Always cross-validate results with other network analysis tools
+- Test in lab environments before production use
+- Have qualified network engineers review analysis results
+- Maintain backups of configuration before making network changes
+- Follow your organization's change management procedures
+
+By using this tool, you acknowledge that you have read, understood, and accept these terms and limitations.
